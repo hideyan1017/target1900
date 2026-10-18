@@ -3,7 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ターゲット1900 早押しタイピング</title>
+    <!-- メタタグ・ファビコン -->
+  <link rel="icon" href="https://raw.githubusercontent.com/hideyan1017/Kpedia/refs/heads/main/IMG_6634.png">
+  <meta property="og:type" content="article" />
+  <link rel="apple-touch-icon" sizes="180x180" href="https://raw.githubusercontent.com/hideyan1017/target1900/refs/heads/main/%E3%82%BF%E3%82%B2%E3%83%90%E3%83%88.png">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="https://raw.githubusercontent.com/hideyan1017/target1900/refs/heads/main/%E3%82%BF%E3%82%B2%E3%83%90%E3%83%88.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://raw.githubusercontent.com/hideyan1017/target1900/refs/heads/main/%E3%82%BF%E3%82%B2%E3%83%90%E3%83%88.png">
+
+  <meta property="og:title" content="『英単語ターゲット1900 6訂版』タイピング" />
+  <meta property="og:description" content="タゲタイピングへようこそ" />
+  <meta property="og:image" content="https://raw.githubusercontent.com/hideyan1017/target1900/refs/heads/main/%E3%82%BF%E3%82%B2%E8%A1%A8%E7%B4%99.png" />
+
+  <title>タゲタイピング</title>
   <!-- リアルタイム対戦用 PeerJS ライブラリ -->
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <style>
@@ -22,6 +34,7 @@
       margin: 0;
       padding: 0;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
@@ -134,6 +147,23 @@
       background: #475569;
     }
 
+    .btn-danger {
+      width: 100%;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 6px;
+      background: #dc2626;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-bottom: 0.8rem;
+    }
+    .btn-danger:hover {
+      background: #b91c1c;
+    }
+
     .btn-copy {
       padding: 0.6rem 1rem;
       border: none;
@@ -179,8 +209,16 @@
       padding: 0.6rem 1rem;
       margin-bottom: 1rem;
       display: flex;
-      justify-content: space-around;
-      font-size: 0.9rem;
+      flex-direction: column;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    .score-row {
+      display: flex;
+      justify-content: space-between;
     }
 
     .timer-bar-container {
@@ -264,11 +302,18 @@
       align-items: center;
       justify-content: center;
       transition: background 0.1s;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .choice-btn:hover {
       background: #f1f5f9;
-      border-color: #0284c7;
+    }
+
+    .choice-btn:focus, .choice-btn:active {
+      outline: none;
+      box-shadow: none;
+      background: #e2e8f0;
     }
 
     .room-info-box {
@@ -285,6 +330,8 @@
     .player-list {
       list-style: none;
       margin-bottom: 1rem;
+      max-height: 200px;
+      overflow-y: auto;
     }
 
     .player-item {
@@ -294,6 +341,7 @@
       margin-bottom: 0.4rem;
       display: flex;
       justify-content: space-between;
+      align-items: center;
       border: 1px solid var(--border-color);
       font-size: 0.9rem;
     }
@@ -307,6 +355,19 @@
     }
     .status-badge.ready { background: #dcfce7; color: #166534; }
 
+    .btn-report {
+      padding: 0.2rem 0.4rem;
+      font-size: 0.75rem;
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fca5a5;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-report:hover {
+      background: #fee2e2;
+    }
+
     .msg-overlay {
       background: #f8fafc;
       border: 1px solid var(--border-color);
@@ -319,7 +380,7 @@
     #countdown-overlay {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(246, 240, 222, 0.95);
+      background: #ffffff;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -344,7 +405,7 @@
     
     <div class="card">
       <button class="btn-primary" onclick="goToSoloSetup()">1人用モード</button>
-      <button class="btn-secondary" onclick="goToMultiLobby()">オンライン対戦モード (1対1)</button>
+      <button class="btn-secondary" onclick="goToMultiLobby()">オンライン対戦モード (最大8人)</button>
     </div>
   </div>
 
@@ -362,7 +423,7 @@
       <div class="form-group">
         <label>出題範囲プリセット</label>
         <select id="preset-select" onchange="applyPreset('solo')">
-          <option value="all">全範囲 (1 - 1900)</option>
+          <option value="all" selected>全範囲 (1 - 1900)</option>
           <option value="1-800">Part 1 (1 - 800)</option>
           <option value="801-1500">Part 2 (801 - 1500)</option>
           <option value="1501-1900">Part 3 (1501 - 1900)</option>
@@ -381,8 +442,8 @@
       <div class="form-group">
         <label>問題数</label>
         <select id="question-count">
-          <option value="10">10 問</option>
-          <option value="20" selected>20 問</option>
+          <option value="10" selected>10 問</option>
+          <option value="20">20 問</option>
           <option value="50">50 問</option>
           <option value="100">100 問</option>
         </select>
@@ -395,7 +456,7 @@
 
   <!-- マルチ対戦 ロビー -->
   <div id="multi-lobby-screen" class="screen">
-    <h1>オンライン対戦 (1対1)</h1>
+    <h1>オンライン対戦 (最大8人)</h1>
     <p class="subtitle">部屋の作成と参加</p>
 
     <div class="card">
@@ -425,7 +486,7 @@
         <div class="form-group">
           <label>出題範囲プリセット</label>
           <select id="multi-preset-select" onchange="applyPreset('multi')">
-            <option value="all">全範囲 (1 - 1900)</option>
+            <option value="all" selected>全範囲 (1 - 1900)</option>
             <option value="1-800">Part 1 (1 - 800)</option>
             <option value="801-1500">Part 2 (801 - 1500)</option>
             <option value="1501-1900">Part 3 (1501 - 1900)</option>
@@ -453,19 +514,28 @@
       </div>
 
       <div class="card">
-        <label>共有用URL</label>
+        <!-- 6桁IDを上に大きく表示 -->
+        <label style="font-size: 0.9rem; font-weight: 700; color: #0284c7;">ルームID (6桁)</label>
+        <div class="room-info-box" id="room-id-display" style="font-size: 1.5rem; font-weight: 800; text-align: center; letter-spacing: 2px;">------</div>
+
+        <label style="margin-top: 1rem;">共有用URL</label>
         <div class="room-info-box" id="share-url-display">接続準備中...</div>
         <button class="btn-copy" id="copy-btn" onclick="copyShareUrl()">URLをコピー</button>
         
-        <label style="margin-top: 1.2rem;">参加メンバー (<span id="participant-count">1</span>/2人)</label>
+        <label style="margin-top: 1.2rem;">参加メンバー (<span id="participant-count">1</span>/8人)</label>
         <ul class="player-list" id="player-list-ui"></ul>
 
-        <button class="btn-primary" id="host-start-btn" onclick="hostStartGame()" style="display:none;">対戦を開始する</button>
-        <p id="guest-wait-msg" style="text-align:center; color:#64748b; font-size:0.85rem; margin-top:0.5rem;">ホストの開始をお待ちください...</p>
+        <!-- ホスト用：対戦開始 / 部屋解散ボタン -->
+        <button class="btn-primary" id="host-start-btn" onclick="hostStartGame()">対戦を開始する</button>
+        <button class="btn-danger" id="host-close-room-btn" onclick="hostCloseRoom()" style="display:none;">部屋を解散する</button>
+        
+        <!-- ゲスト用：待機中メッセージ / 退出ボタン -->
+        <p id="guest-wait-msg" style="text-align:center; color:#64748b; font-size:0.85rem; margin-top:0.5rem; display:none;">ホストの開始をお待ちください...</p>
+        <button class="btn-secondary" id="guest-leave-btn" onclick="leaveRoomAndHome()" style="display:none; margin-top:0.5rem;">部屋から退出する</button>
       </div>
     </div>
 
-    <button class="btn-secondary" onclick="switchScreen('home-screen')">戻る</button>
+    <button class="btn-secondary" id="lobby-back-btn" onclick="switchScreen('home-screen')">戻る</button>
   </div>
 
   <!-- ゲーム画面 -->
@@ -481,10 +551,7 @@
       <button class="btn-quit" onclick="quitGame()">やめる</button>
     </div>
 
-    <div class="score-board" id="score-board" style="display:none;">
-      <div><span id="my-score-text">あなた: 0問</span></div>
-      <div><span id="opp-score-text">対戦相手: 0問</span></div>
-    </div>
+    <div class="score-board" id="score-board" style="display:none;"></div>
 
     <div class="timer-bar-container">
       <div id="timer-bar" class="timer-bar"></div>
@@ -527,7 +594,10 @@
       <button class="btn-primary" id="multi-restart-btn" onclick="backToLobbySettings()" style="display:none; margin-bottom: 0.8rem;">設定を変更してもう一度遊ぶ</button>
       <p id="guest-restart-msg" style="color:#64748b; font-size:0.85rem; margin-bottom:0.8rem; display:none;">ホストの設定をお待ちください...</p>
 
-      <!-- ソロ時は設定画面へ、マルチ時はホームへ戻るボタン -->
+      <!-- 参加者用：待機室に戻るボタン -->
+      <button class="btn-primary" id="guest-back-lobby-btn" onclick="backToLobbySettingsGuest()" style="display:none; margin-bottom: 0.8rem;">待機室に戻る</button>
+
+      <!-- ソロ時は設定画面へ、マルチ時は退出ボタンを表示 -->
       <button class="btn-secondary" id="result-back-btn" onclick="handleResultBack()">設定画面に戻る</button>
     </div>
   </div>
@@ -633,7 +703,7 @@ function playSound(type) {
 
 // 単語データ
 const rawWords = [
- [1,"create","を創り出す"],[2,"increase","増加する"],[3,"improve","を向上させる"],[4,"mean","を意味する"],[5,"own","を所有している"],
+   [1,"create","を創り出す"],[2,"increase","増加する"],[3,"improve","を向上させる"],[4,"mean","を意味する"],[5,"own","を所有している"],
   [6,"include","を含む"],[7,"consider","を見なす"],[8,"allow","を許す"],[9,"suggest","を提案する"],[10,"produce","を生産する"],
   [11,"decide","を決める"],[12,"offer","を提供する"],[13,"require","を要求する"],[14,"share","を共有する"],[15,"store","を保存する"],
   [16,"tend","傾向がある"],[17,"concern","心配している"],[18,"describe","について述べる"],[19,"involve","に関与させる"],[20,"reduce","を減らす"],
@@ -1014,7 +1084,7 @@ const rawWords = [
   [1891,"contagious","感染性の"],[1892,"cynical","冷笑的な"],[1893,"dumb","ばかげた"],[1894,"monotonous","単調な"],[1895,"perpetual","永続的な"],
   [1896,"dizzy","めまいがする"],[1897,"weary","疲れ果てた"],[1898,"numb","麻痺した"],[1899,"mortal","致命的な"],[1900,"zealous","熱心な"]
 ];
-;
+
 
 const wordsDatabase = [];
 const rawMap = new Map();
@@ -1040,16 +1110,18 @@ const MAX_TIME = 6.0;
 let timerId = null;
 let isAnswerable = false;
 
+// 最大8人用マルチプレイ管理
+const MAX_PLAYERS = 8;
 let peer = null;
-let conn = null;
+let hostConnMap = new Map();
+let guestConn = null;
+let myPeerId = "";
 let myName = "";
 let roomId = "";
 let isHost = false;
-let opponentName = "対戦相手";
-let opponentScore = 0;
-let myFinishedCurrentQ = false;
-let oppFinishedCurrentQ = false;
-let hasOpponentJoined = false;
+let isGameStarted = false; // 試合中かどうかを判定するフラグ
+
+let playersList = [];
 
 window.onload = function() {
   const params = new URLSearchParams(window.location.search);
@@ -1148,7 +1220,6 @@ function runCountdown(callback) {
   }, 800);
 }
 
-// ホスト側の出題リスト生成ロジック
 function generateMultiQuizList() {
   const startNum = parseInt(document.getElementById('multi-start-num').value) || 1;
   const endNum = parseInt(document.getElementById('multi-end-num').value) || 1900;
@@ -1163,6 +1234,16 @@ function generateMultiQuizList() {
 }
 
 // --- 通信処理 ---
+function broadcast(data) {
+  if (isHost) {
+    hostConnMap.forEach(conn => {
+      if (conn && conn.open) conn.send(data);
+    });
+  } else if (guestConn && guestConn.open) {
+    guestConn.send(data);
+  }
+}
+
 function createRoom() {
   const nameInput = document.getElementById('multi-player-name').value.trim();
   if (!nameInput) {
@@ -1172,23 +1253,50 @@ function createRoom() {
   }
   myName = nameInput;
   isHost = true;
-  hasOpponentJoined = false;
+  isGameStarted = false;
+  hostConnMap.clear();
+
+  const sixDigitId = String(Math.floor(Math.random() * 1000000)).padStart(6, '0');
 
   document.getElementById('multi-create-card').style.display = 'none';
   document.getElementById('multi-join-card').style.display = 'none';
   document.getElementById('room-waiting-box').style.display = 'block';
   document.getElementById('host-settings-card').style.display = 'block';
+  document.getElementById('host-close-room-btn').style.display = 'block';
+  document.getElementById('guest-leave-btn').style.display = 'none';
+  document.getElementById('lobby-back-btn').style.display = 'none';
 
-  peer = new Peer();
+  peer = new Peer(sixDigitId);
   peer.on('open', (id) => {
+    myPeerId = id;
     roomId = id;
+    playersList = [{ id: myPeerId, name: myName, score: 0, finishedQ: false }];
+    
+    document.getElementById('room-id-display').innerText = roomId;
     const shareUrl = location.protocol + '//' + location.host + location.pathname + '?room=' + roomId;
     document.getElementById('share-url-display').innerText = shareUrl;
-    updateRoomUI([{ name: myName + " (あなた)", ready: true }]);
+    renderLobbyPlayerList();
+  });
+
+  peer.on('error', (err) => {
+    if (err.type === 'unavailable-id') {
+      createRoom();
+    } else {
+      alert('エラーが発生しました: ' + err.type);
+    }
   });
 
   peer.on('connection', (c) => {
-    if (hasOpponentJoined) {
+    // 試合が始まっている場合は接続を拒否
+    if (isGameStarted) {
+      c.on('open', () => {
+        c.send({ type: 'STARTED' });
+        setTimeout(() => c.close(), 500);
+      });
+      return;
+    }
+
+    if (playersList.length >= MAX_PLAYERS) {
       c.on('open', () => {
         c.send({ type: 'FULL' });
         setTimeout(() => c.close(), 500);
@@ -1196,9 +1304,12 @@ function createRoom() {
       return;
     }
 
-    conn = c;
-    hasOpponentJoined = true;
-    setupConnection();
+    c.on('open', () => {
+      hostConnMap.set(c.peer, c);
+      broadcastState();
+    });
+
+    setupConnListeners(c);
   });
 }
 
@@ -1221,77 +1332,178 @@ function joinRoom() {
   }
 
   isHost = false;
+  isGameStarted = false;
   document.getElementById('multi-create-card').style.display = 'none';
   document.getElementById('multi-join-card').style.display = 'none';
   document.getElementById('room-waiting-box').style.display = 'block';
   document.getElementById('host-settings-card').style.display = 'none';
+  document.getElementById('host-close-room-btn').style.display = 'none';
+  document.getElementById('guest-leave-btn').style.display = 'block';
+  document.getElementById('lobby-back-btn').style.display = 'none';
 
   peer = new Peer();
-  peer.on('open', () => {
-    conn = peer.connect(roomId);
-    setupConnection();
+  peer.on('open', (id) => {
+    myPeerId = id;
+    guestConn = peer.connect(roomId);
+    
+    guestConn.on('open', () => {
+      guestConn.send({ type: 'JOIN', name: myName, peerId: myPeerId });
+      document.getElementById('room-id-display').innerText = roomId;
+    });
+
+    setupConnListeners(guestConn);
   });
 }
 
-function setupConnection() {
-  conn.on('open', () => {
-    conn.send({ type: 'JOIN', name: myName });
-  });
-
-  conn.on('data', (data) => {
+function setupConnListeners(c) {
+  c.on('data', (data) => {
     if (data.type === 'FULL') {
-      alert('この部屋はすでに満員（2人）です。');
+      alert('この部屋はすでに満員（8人）です。');
       leaveRoomAndHome();
-    } else if (data.type === 'JOIN') {
-      opponentName = data.name;
-      if (isHost) {
-        document.getElementById('host-start-btn').style.display = 'block';
-        document.getElementById('guest-wait-msg').style.display = 'none';
-        conn.send({ type: 'ACCEPT', name: myName });
+    } else if (data.type === 'STARTED') {
+      alert('この部屋はすでに試合が始まっているため参加できません。');
+      leaveRoomAndHome();
+    } else if (data.type === 'JOIN' && isHost) {
+      if (isGameStarted) {
+        c.send({ type: 'STARTED' });
+        setTimeout(() => c.close(), 500);
+        return;
       }
-      updateRoomUI([
-        { name: isHost ? myName + " (あなた)" : opponentName, ready: true },
-        { name: isHost ? opponentName : myName + " (あなた)", ready: true }
-      ]);
-    } else if (data.type === 'ACCEPT') {
-      opponentName = data.name;
-      updateRoomUI([
-        { name: opponentName + " (ホスト)", ready: true },
-        { name: myName + " (あなた)", ready: true }
-      ]);
+      if (!playersList.some(p => p.id === data.peerId)) {
+        playersList.push({ id: data.peerId, name: data.name, score: 0, finishedQ: false });
+      }
+      broadcastState();
+    } else if (data.type === 'STATE_UPDATE') {
+      playersList = data.playersList;
+      renderLobbyPlayerList();
     } else if (data.type === 'START_GAME') {
+      isGameStarted = true;
       currentQuizList = data.quizList;
       currentQuestionIndex = 0;
       correctCount = 0;
-      opponentScore = 0;
+      playersList.forEach(p => { p.score = 0; p.finishedQ = false; });
+
       switchScreen('game-screen');
       document.getElementById('score-board').style.display = 'flex';
       
       runCountdown(() => {
         loadQuestion();
       });
+    } else if (data.type === 'NEXT_QUESTION') {
+      currentQuizList = data.quizList;
+      currentQuestionIndex = data.questionIndex;
+      playersList = data.playersList;
+      
+      switchScreen('game-screen');
+      loadQuestion();
+    } else if (data.type === 'SHOW_RESULT') {
+      playersList = data.playersList;
+      showResult();
     } else if (data.type === 'BACK_TO_LOBBY') {
-      // ゲスト側もロビー（設定画面）へ戻る
+      isGameStarted = false;
       switchScreen('multi-lobby-screen');
-      document.getElementById('host-settings-card').style.display = 'none';
+      document.getElementById('host-settings-card').style.display = isHost ? 'block' : 'none';
       document.getElementById('room-waiting-box').style.display = 'block';
-      document.getElementById('host-start-btn').style.display = 'none';
-      document.getElementById('guest-wait-msg').style.display = 'block';
+      document.getElementById('host-start-btn').style.display = isHost ? 'block' : 'none';
+      document.getElementById('host-close-room-btn').style.display = isHost ? 'block' : 'none';
+      document.getElementById('guest-wait-msg').style.display = isHost ? 'none' : 'block';
+      document.getElementById('guest-leave-btn').style.display = isHost ? 'none' : 'block';
     } else if (data.type === 'PLAYER_FINISH_Q') {
-      oppFinishedCurrentQ = true;
-      opponentScore = data.score;
-      updateScoreBoard();
-      checkBothFinishedQuestion();
-    } else if (data.type === 'LEAVE') {
-      alert('対戦相手が退出しました。');
+      if (isHost) {
+        const p = playersList.find(item => item.id === data.peerId);
+        if (p) {
+          p.score = data.score;
+          p.finishedQ = true;
+        }
+        broadcastState();
+        checkAllFinishedQuestion();
+      }
+    } else if (data.type === 'CLOSE_ROOM') {
+      alert('ホストが部屋を解散しました。');
       leaveRoomAndHome();
+    } else if (data.type === 'REPORT_PLAYER') {
+      if (isHost) {
+        const target = playersList.find(p => p.id === data.targetId);
+        alert(`[通報通知] プレイヤー「${target ? target.name : '不明'}」が通報されました。`);
+      }
+    } else if (data.type === 'LEAVE') {
+      handlePeerDisconnection(data.peerId);
     }
   });
 
-  conn.on('close', () => {
-    alert('対戦相手との接続が切れました。');
-    leaveRoomAndHome();
+  c.on('close', () => {
+    handlePeerDisconnection(c.peer);
   });
+}
+
+function handlePeerDisconnection(peerId) {
+  if (isHost) {
+    playersList = playersList.filter(item => item.id !== peerId);
+    hostConnMap.delete(peerId);
+    broadcastState();
+    checkHostAloneDuringGame();
+  } else {
+    // ゲスト側でホストとの接続が切れた場合
+    if (peerId === roomId || (guestConn && guestConn.peer === peerId)) {
+      alert('ホストとの接続が切れました。');
+      leaveRoomAndHome();
+    }
+  }
+}
+
+function broadcastState() {
+  if (!isHost) return;
+  broadcast({ type: 'STATE_UPDATE', playersList: playersList });
+  renderLobbyPlayerList();
+}
+
+function renderLobbyPlayerList() {
+  const listEl = document.getElementById('player-list-ui');
+  listEl.innerHTML = '';
+  playersList.forEach(p => {
+    const isMe = p.id === myPeerId;
+    const isHostUser = p.id === roomId;
+    
+    let reportBtnHtml = '';
+    if (!isMe) {
+      reportBtnHtml = `<button class="btn-report" onclick="reportPlayer('${p.id}')">通報</button>`;
+    }
+
+    listEl.innerHTML += `
+      <li class="player-item">
+        <span>${p.name}${isMe ? ' (あなた)' : ''}${isHostUser ? ' [ホスト]' : ''}</span>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+          ${reportBtnHtml}
+          <span class="status-badge ready">接続完了</span>
+        </div>
+      </li>
+    `;
+  });
+  document.getElementById('participant-count').innerText = playersList.length;
+
+  if (isHost) {
+    document.getElementById('host-start-btn').style.display = 'block';
+    document.getElementById('host-close-room-btn').style.display = 'block';
+    document.getElementById('guest-wait-msg').style.display = 'none';
+    document.getElementById('guest-leave-btn').style.display = 'none';
+  } else {
+    document.getElementById('host-start-btn').style.display = 'none';
+    document.getElementById('host-close-room-btn').style.display = 'none';
+    document.getElementById('guest-wait-msg').style.display = 'block';
+    document.getElementById('guest-leave-btn').style.display = 'block';
+  }
+}
+
+function reportPlayer(targetId) {
+  if (confirm('このプレイヤーを通報しますか？')) {
+    if (isHost) {
+      const target = playersList.find(p => p.id === targetId);
+      alert(`[通報通知] プレイヤー「${target ? target.name : '不明'}」を通報しました。`);
+    } else {
+      guestConn.send({ type: 'REPORT_PLAYER', targetId: targetId });
+      alert('ホストに通報を送信しました。');
+    }
+  }
 }
 
 function copyShareUrl() {
@@ -1303,34 +1515,30 @@ function copyShareUrl() {
   });
 }
 
-function updateRoomUI(players) {
-  const listEl = document.getElementById('player-list-ui');
-  listEl.innerHTML = '';
-  players.forEach(p => {
-    listEl.innerHTML += `
-      <li class="player-item">
-        <span>${p.name}</span>
-        <span class="status-badge ready">接続完了</span>
-      </li>
-    `;
-  });
-  document.getElementById('participant-count').innerText = players.length;
+function hostCloseRoom() {
+  if (confirm('部屋を解散してよろしいですか？')) {
+    broadcast({ type: 'CLOSE_ROOM' });
+    leaveRoomAndHome();
+  }
 }
 
 function hostStartGame() {
-  if (!conn) {
-    alert("相手の参加をお待ちください。");
+  if (playersList.length < 2) {
+    alert("対戦には2人以上の参加者が必要です。");
     return;
   }
+
   const generatedQuiz = generateMultiQuizList();
   if (!generatedQuiz) return;
 
+  isGameStarted = true;
   currentQuizList = generatedQuiz;
-  conn.send({ type: 'START_GAME', quizList: currentQuizList });
-
   currentQuestionIndex = 0;
   correctCount = 0;
-  opponentScore = 0;
+  playersList.forEach(p => { p.score = 0; p.finishedQ = false; });
+
+  broadcast({ type: 'START_GAME', quizList: currentQuizList });
+
   switchScreen('game-screen');
   document.getElementById('score-board').style.display = 'flex';
   
@@ -1339,37 +1547,48 @@ function hostStartGame() {
   });
 }
 
-function backToLobbySettings() {
-  if (!conn) return;
-  // ホストが設定画面に戻る指令をゲストに送る
-  conn.send({ type: 'BACK_TO_LOBBY' });
+function checkHostAloneDuringGame() {
+  if (!isHost || !isGameStarted) return;
+  // ホスト以外が誰もいなくなった場合（自分＝1人のみ）
+  if (playersList.length <= 1) {
+    alert('他のプレイヤーが全員退出したため、ゲームを終了します。');
+    isGameStarted = false;
+    backToLobbySettings();
+  }
+}
 
-  // ホスト自身もロビー画面（設定付き）へ戻る
+function backToLobbySettings() {
+  if (!isHost) return;
+  isGameStarted = false;
+  broadcast({ type: 'BACK_TO_LOBBY' });
+
   switchScreen('multi-lobby-screen');
-  document.getElementById('multi-create-card').style.display = 'none';
-  document.getElementById('multi-join-card').style.display = 'none';
-  document.getElementById('room-waiting-box').style.display = 'block';
   document.getElementById('host-settings-card').style.display = 'block';
+  document.getElementById('room-waiting-box').style.display = 'block';
   document.getElementById('host-start-btn').style.display = 'block';
+  document.getElementById('host-close-room-btn').style.display = 'block';
   document.getElementById('guest-wait-msg').style.display = 'none';
+  document.getElementById('guest-leave-btn').style.display = 'none';
+  document.getElementById('lobby-back-btn').style.display = 'none';
+}
+
+function backToLobbySettingsGuest() {
+  isGameStarted = false;
+  switchScreen('multi-lobby-screen');
+  document.getElementById('host-settings-card').style.display = 'none';
+  document.getElementById('room-waiting-box').style.display = 'block';
+  document.getElementById('host-start-btn').style.display = 'none';
+  document.getElementById('host-close-room-btn').style.display = 'none';
+  document.getElementById('guest-wait-msg').style.display = 'block';
+  document.getElementById('guest-leave-btn').style.display = 'block';
+  document.getElementById('lobby-back-btn').style.display = 'none';
 }
 
 function handleResultBack() {
   if (mode === 'solo') {
-    // ソロモードの場合は1人用設定画面に戻る
     switchScreen('solo-setup-screen');
   } else {
-    // マルチ対戦の場合は設定画面（ロビー）に戻る
-    switchScreen('multi-lobby-screen');
-    if (isHost) {
-      document.getElementById('host-settings-card').style.display = 'block';
-      document.getElementById('host-start-btn').style.display = 'block';
-      document.getElementById('guest-wait-msg').style.display = 'none';
-    } else {
-      document.getElementById('host-settings-card').style.display = 'none';
-      document.getElementById('host-start-btn').style.display = 'none';
-      document.getElementById('guest-wait-msg').style.display = 'block';
-    }
+    leaveRoomAndHome();
   }
 }
 
@@ -1382,19 +1601,26 @@ function quitGame() {
 function leaveRoomAndHome() {
   clearInterval(timerId);
   isAnswerable = false;
-  hasOpponentJoined = false;
-  if (conn) {
-    try { conn.send({ type: 'LEAVE' }); } catch(e){}
-    conn.close();
+  isGameStarted = false;
+
+  if (mode === 'multi') {
+    broadcast({ type: 'LEAVE', peerId: myPeerId });
+    if (guestConn) try { guestConn.close(); } catch(e){}
+    hostConnMap.forEach(c => { try { c.close(); } catch(e){} });
+    hostConnMap.clear();
+    if (peer) {
+      peer.destroy();
+    }
   }
-  if (peer) {
-    peer.destroy();
-  }
+
   window.history.replaceState({}, document.title, window.location.pathname);
   document.getElementById('multi-create-card').style.display = 'block';
   document.getElementById('multi-join-card').style.display = 'block';
   document.getElementById('room-waiting-box').style.display = 'none';
   document.getElementById('host-settings-card').style.display = 'none';
+  document.getElementById('host-close-room-btn').style.display = 'none';
+  document.getElementById('guest-leave-btn').style.display = 'none';
+  document.getElementById('lobby-back-btn').style.display = 'block';
   switchScreen('home-screen');
 }
 
@@ -1402,9 +1628,6 @@ function loadQuestion() {
   clearInterval(timerId);
   document.getElementById('msg-overlay').style.display = 'none';
   document.getElementById('controls-area').style.display = 'block';
-
-  myFinishedCurrentQ = false;
-  oppFinishedCurrentQ = false;
 
   currentWord = currentQuizList[currentQuestionIndex];
   currentCharIndex = 1; 
@@ -1439,9 +1662,21 @@ function loadQuestion() {
 }
 
 function updateScoreBoard() {
+  const sb = document.getElementById('score-board');
   if (mode === 'multi') {
-    document.getElementById('my-score-text').innerText = `${myName || "あなた"}: ${correctCount}問`;
-    document.getElementById('opp-score-text').innerText = `${opponentName}: ${opponentScore}問`;
+    sb.innerHTML = '';
+    const myP = playersList.find(p => p.id === myPeerId);
+    if (myP) myP.score = correctCount;
+
+    playersList.forEach(p => {
+      const isMe = p.id === myPeerId;
+      sb.innerHTML += `
+        <div class="score-row">
+          <span>${p.name}${isMe ? ' (あなた)' : ''}:</span>
+          <strong>${p.score}問</strong>
+        </div>
+      `;
+    });
   }
 }
 
@@ -1531,10 +1766,19 @@ function handleInput(selectedChar) {
 function handleFinishQuestion(isSuccess) {
   isAnswerable = false;
   clearInterval(timerId);
-  myFinishedCurrentQ = true;
 
-  if (mode === 'multi' && conn) {
-    conn.send({ type: 'PLAYER_FINISH_Q', score: correctCount });
+  const myP = playersList.find(p => p.id === myPeerId);
+  if (myP) {
+    myP.finishedQ = true;
+    myP.score = correctCount;
+  }
+
+  if (mode === 'multi') {
+    if (isHost) {
+      checkAllFinishedQuestion();
+    } else {
+      guestConn.send({ type: 'PLAYER_FINISH_Q', peerId: myPeerId, score: correctCount });
+    }
   }
 
   document.getElementById('controls-area').style.display = 'none';
@@ -1555,19 +1799,36 @@ function handleFinishQuestion(isSuccess) {
     subEl.innerText = "次の問題へ進みます...";
     setTimeout(nextQuestion, 1200);
   } else {
-    subEl.innerText = "対戦相手の回答を待っています...";
-    checkBothFinishedQuestion();
+    subEl.innerText = "他のプレイヤーの回答を待っています...";
   }
 }
 
-function checkBothFinishedQuestion() {
-  if (mode === 'solo') return;
+function checkAllFinishedQuestion() {
+  if (!isHost) return;
 
-  if (myFinishedCurrentQ && oppFinishedCurrentQ) {
-    document.getElementById('msg-sub').innerText = "まもなく次の問題へ";
+  const allFinished = playersList.every(p => p.finishedQ);
+  if (allFinished) {
     setTimeout(() => {
-      nextQuestion();
-    }, 1000);
+      playersList.forEach(p => p.finishedQ = false);
+
+      currentQuestionIndex++;
+      if (currentQuestionIndex < currentQuizList.length) {
+        loadQuestion();
+        broadcast({
+          type: 'NEXT_QUESTION',
+          quizList: currentQuizList,
+          questionIndex: currentQuestionIndex,
+          playersList: playersList
+        });
+      } else {
+        isGameStarted = false;
+        showResult();
+        broadcast({
+          type: 'SHOW_RESULT',
+          playersList: playersList
+        });
+      }
+    }, 1200);
   }
 }
 
@@ -1581,18 +1842,22 @@ function nextQuestion() {
 }
 
 function showResult() {
+  isGameStarted = false;
   switchScreen('result-screen');
   
   const subtitleEl = document.getElementById('result-subtitle');
   const rankingEl = document.getElementById('final-ranking-list');
   const multiRestartBtn = document.getElementById('multi-restart-btn');
   const guestRestartMsg = document.getElementById('guest-restart-msg');
+  const guestBackLobbyBtn = document.getElementById('guest-back-lobby-btn');
   const backBtn = document.getElementById('result-back-btn');
 
   if (mode === 'solo') {
     subtitleEl.innerText = "1人用モード結果";
     multiRestartBtn.style.display = 'none';
     guestRestartMsg.style.display = 'none';
+    guestBackLobbyBtn.style.display = 'none';
+    backBtn.style.display = 'block';
     backBtn.innerText = "設定画面に戻る";
     rankingEl.innerHTML = `
       <div class="player-item" style="font-size: 0.95rem; padding: 0.7rem 1rem;">
@@ -1601,29 +1866,33 @@ function showResult() {
       </div>
     `;
   } else {
-    let winText = "引き分け";
-    if (correctCount > opponentScore) {
-      winText = `勝者: ${myName} さん`;
-    } else if (correctCount < opponentScore) {
-      winText = `勝者: ${opponentName} さん`;
+    const sorted = [...playersList].sort((a, b) => b.score - a.score);
+    if (sorted.length > 0 && sorted[0].score > (sorted[1]?.score ?? -1)) {
+      subtitleEl.innerText = `勝者: ${sorted[0].name} さん！`;
+    } else {
+      subtitleEl.innerText = "引き分け！";
     }
-    subtitleEl.innerText = winText;
 
-    multiRestartBtn.style.display = 'none';
-    guestRestartMsg.style.display = 'none';
-    backBtn.innerText = "設定画面に戻る";
-
-    const players = [
-      { name: myName + " (あなた)", score: correctCount },
-      { name: opponentName, score: opponentScore }
-    ];
-    players.sort((a, b) => b.score - a.score);
+    if (isHost) {
+      multiRestartBtn.style.display = 'block';
+      guestRestartMsg.style.display = 'none';
+      guestBackLobbyBtn.style.display = 'none';
+      backBtn.style.display = 'block';
+      backBtn.innerText = "ゲームから退出する";
+    } else {
+      multiRestartBtn.style.display = 'none';
+      guestRestartMsg.style.display = 'block';
+      guestBackLobbyBtn.style.display = 'block';
+      backBtn.style.display = 'block';
+      backBtn.innerText = "ゲームから退出する";
+    }
 
     rankingEl.innerHTML = '';
-    players.forEach((p, idx) => {
+    sorted.forEach((p, idx) => {
+      const isMe = p.id === myPeerId;
       rankingEl.innerHTML += `
         <div class="player-item" style="font-size: 0.95rem; padding: 0.7rem 1rem;">
-          <span>${idx + 1}位: ${p.name}</span>
+          <span>${idx + 1}位: ${p.name}${isMe ? ' (あなた)' : ''}</span>
           <strong>${p.score} 問正解</strong>
         </div>
       `;
