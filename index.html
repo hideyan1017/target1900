@@ -4,17 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ターゲット1900 早押しタイピング</title>
+  <!-- リアルタイム対戦用 PeerJS ライブラリ -->
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <style>
     :root {
-      --primary-yellow: #facc15;
-      --bg-pattern: #fef08a;
+      --bg-color: #f6f0de;
       --card-bg: #ffffff;
-      --text-dark: #1e293b;
-      --accent-orange: #ea580c;
-      --accent-blue: #2563eb;
+      --text-main: #1e293b;
+      --accent-blue: #0284c7;
       --accent-green: #16a34a;
       --accent-red: #dc2626;
-      --shadow-color: rgba(0, 0, 0, 0.15);
+      --border-color: #cbd5e1;
     }
 
     * {
@@ -26,15 +26,8 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #fde047;
-      background-image: 
-        linear-gradient(135deg, rgba(250, 204, 21, 0.6) 25%, transparent 25%),
-        linear-gradient(225deg, rgba(250, 204, 21, 0.6) 25%, transparent 25%),
-        linear-gradient(45deg, rgba(250, 204, 21, 0.6) 25%, transparent 25%),
-        linear-gradient(315deg, rgba(250, 204, 21, 0.6) 25%, #fef08a 25%);
-      background-position: 20px 0, 20px 0, 0 0, 0 0;
-      background-size: 40px 40px;
-      color: var(--text-dark);
+      background-color: var(--bg-color);
+      color: var(--text-main);
       min-height: 100vh;
       display: flex;
       justify-content: center;
@@ -44,90 +37,59 @@
 
     .container {
       width: 100%;
-      max-width: 550px;
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(8px);
-      border-radius: 20px;
-      padding: 1.8rem;
-      box-shadow: 0 12px 30px var(--shadow-color);
-      border: 3px solid #ffffff;
+      max-width: 600px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--border-color);
       position: relative;
-      overflow: hidden;
     }
 
-    .screen {
-      display: none;
-    }
-
-    .screen.active {
-      display: block;
-    }
+    .screen { display: none; }
+    .screen.active { display: block; }
 
     h1 {
       text-align: center;
-      color: #b45309;
+      color: var(--text-main);
       margin-bottom: 0.5rem;
-      font-size: 1.8rem;
-      font-weight: 900;
-      text-shadow: 1px 1px 0 #fff;
+      font-size: 1.6rem;
+      font-weight: 700;
     }
 
     p.subtitle {
       text-align: center;
       color: #64748b;
-      margin-bottom: 1.8rem;
-      font-size: 0.95rem;
-      font-weight: bold;
-    }
-
-    .badge {
-      display: inline-block;
-      background: #ea580c;
-      color: white;
-      font-weight: bold;
-      padding: 0.3rem 0.8rem;
-      font-size: 0.85rem;
-      border-radius: 4px;
-      transform: skewX(-12deg);
-      box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
-      margin-bottom: 0.5rem;
-    }
-
-    .badge-text {
-      transform: skewX(12deg);
-      display: inline-block;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
     }
 
     .card {
-      background: var(--card-bg);
-      border-radius: 14px;
+      background: #f8fafc;
+      border-radius: 8px;
       padding: 1.2rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      border: 2px solid #e2e8f0;
+      border: 1px solid var(--border-color);
       margin-bottom: 1.2rem;
     }
 
-    .form-group {
-      margin-bottom: 1.2rem;
-    }
+    .form-group { margin-bottom: 1.2rem; }
 
     label {
       display: block;
       margin-bottom: 0.4rem;
       color: #475569;
-      font-size: 0.9rem;
-      font-weight: bold;
+      font-size: 0.85rem;
+      font-weight: 600;
     }
 
-    select, input[type="number"] {
+    input[type="text"], input[type="number"], select {
       width: 100%;
-      padding: 0.75rem;
-      border-radius: 10px;
-      border: 2px solid #cbd5e1;
-      background: #f8fafc;
-      color: var(--text-dark);
-      font-size: 1rem;
-      font-weight: bold;
+      padding: 0.65rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: #ffffff;
+      color: var(--text-main);
+      font-size: 0.95rem;
     }
 
     .range-inputs {
@@ -138,39 +100,66 @@
 
     .btn-primary {
       width: 100%;
-      padding: 1.1rem;
+      padding: 0.8rem;
       border: none;
-      border-radius: 12px;
-      background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+      border-radius: 6px;
+      background: #0284c7;
       color: white;
-      font-weight: 900;
-      font-size: 1.2rem;
+      font-weight: 600;
+      font-size: 1rem;
       cursor: pointer;
-      box-shadow: 0 6px 0 #1e40af, 0 8px 15px rgba(0,0,0,0.2);
-      transition: all 0.1s;
+      transition: background 0.15s;
+      margin-bottom: 0.8rem;
     }
 
-    .btn-primary:active {
-      transform: translateY(4px);
-      box-shadow: 0 2px 0 #1e40af;
+    .btn-primary:hover {
+      background: #0369a1;
+    }
+
+    .btn-secondary {
+      width: 100%;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 6px;
+      background: #64748b;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-bottom: 0.8rem;
+    }
+
+    .btn-secondary:hover {
+      background: #475569;
+    }
+
+    .btn-copy {
+      padding: 0.6rem 1rem;
+      border: none;
+      border-radius: 6px;
+      background: #0284c7;
+      color: white;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      width: 100%;
     }
 
     .btn-quit {
-      padding: 0.35rem 0.8rem;
+      padding: 0.3rem 0.6rem;
       border: none;
-      border-radius: 8px;
+      border-radius: 4px;
+      background: #cbd5e1;
+      color: #334155;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .btn-quit:hover {
       background: #ef4444;
       color: white;
-      font-weight: bold;
-      font-size: 0.85rem;
-      cursor: pointer;
-      box-shadow: 0 2px 0 #b91c1c;
-      transition: all 0.1s;
-    }
-
-    .btn-quit:active {
-      transform: translateY(2px);
-      box-shadow: none;
     }
 
     .game-header {
@@ -178,74 +167,79 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 0.8rem;
-      font-weight: 800;
-      color: #334155;
+      font-weight: 600;
+      color: #64748b;
+      font-size: 0.85rem;
+    }
+
+    .score-board {
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.6rem 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-around;
+      font-size: 0.9rem;
     }
 
     .timer-bar-container {
       width: 100%;
-      height: 12px;
+      height: 8px;
       background: #e2e8f0;
-      border-radius: 6px;
+      border-radius: 4px;
       overflow: hidden;
       margin-bottom: 1.2rem;
-      border: 1px solid #cbd5e1;
+      border: 1px solid var(--border-color);
     }
 
     .timer-bar {
       height: 100%;
       width: 100%;
-      background: linear-gradient(90deg, #3b82f6, #06b6d4);
+      background: #0284c7;
       transition: width 0.1s linear;
     }
 
     .japanese-word {
       text-align: center;
-      font-size: 1.6rem;
-      font-weight: 800;
-      color: var(--text-dark);
-      min-height: 2.5rem;
-      line-height: 1.3;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-main);
+      min-height: 2.2rem;
     }
 
     .word-display {
       display: flex;
       justify-content: center;
-      gap: 0.4rem;
+      gap: 0.3rem;
       margin-top: 1rem;
       flex-wrap: wrap;
     }
 
     .char-box {
-      width: 2.4rem;
-      height: 3rem;
-      background: #f1f5f9;
-      border: 2px solid #cbd5e1;
-      border-radius: 8px;
+      width: 2.2rem;
+      height: 2.8rem;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.6rem;
-      font-weight: 800;
+      font-size: 1.4rem;
+      font-weight: 700;
       font-family: monospace;
-      color: #94a3b8;
+      color: #64748b;
     }
 
     .char-box.filled {
-      background: #dbeafe;
-      color: var(--accent-blue);
-      border-color: #93c5fd;
+      background: #e0f2fe;
+      color: #0369a1;
+      border-color: #0284c7;
     }
 
     .char-box.current {
-      background: #fef3c7;
-      border-color: #f59e0b;
-      animation: pulse 0.8s infinite alternate;
-    }
-
-    @keyframes pulse {
-      0% { border-color: #f59e0b; transform: scale(1); }
-      100% { border-color: #ea580c; transform: scale(1.05); }
+      background: #ffffff;
+      border-color: #0284c7;
     }
 
     .choices-row {
@@ -257,115 +251,120 @@
 
     .choice-btn {
       flex: 1;
-      height: 4.2rem;
-      font-size: 1.8rem;
-      font-weight: 800;
+      height: 3.8rem;
+      font-size: 1.5rem;
+      font-weight: 700;
       background: #ffffff;
-      color: var(--text-dark);
-      border: 3px solid #cbd5e1;
-      border-radius: 14px;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
       cursor: pointer;
-      box-shadow: 0 5px 0 #cbd5e1, 0 6px 10px rgba(0,0,0,0.05);
-      transition: all 0.1s;
       font-family: monospace;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: background 0.1s;
     }
 
-    .choice-btn:active {
-      transform: translateY(3px);
-      box-shadow: 0 2px 0 #cbd5e1;
+    .choice-btn:hover {
+      background: #f1f5f9;
+      border-color: #0284c7;
     }
 
-    .correct-popup {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0);
-      background: rgba(22, 163, 74, 0.95);
-      color: white;
-      padding: 1.2rem 2.5rem;
-      border-radius: 50px;
-      font-size: 2.2rem;
-      font-weight: 900;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-      pointer-events: none;
-      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      z-index: 10;
-      text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+    .room-info-box {
+      background: #ffffff;
+      padding: 0.8rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 0.5rem;
+      word-break: break-all;
+      font-size: 0.85rem;
+      font-family: monospace;
     }
 
-    .correct-popup.show {
-      transform: translate(-50%, -50%) scale(1);
+    .player-list {
+      list-style: none;
+      margin-bottom: 1rem;
     }
 
-    .game-over-panel {
+    .player-item {
+      background: #ffffff;
+      padding: 0.5rem 0.8rem;
+      border-radius: 6px;
+      margin-bottom: 0.4rem;
+      display: flex;
+      justify-content: space-between;
+      border: 1px solid var(--border-color);
+      font-size: 0.9rem;
+    }
+
+    .status-badge {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      background: #f1f5f9;
+      color: #64748b;
+    }
+    .status-badge.ready { background: #dcfce7; color: #166534; }
+
+    .msg-overlay {
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.2rem;
       text-align: center;
-      padding: 1.5rem;
-      background: #fef2f2;
-      border: 2px solid #fca5a5;
-      border-radius: 14px;
       margin-top: 1rem;
     }
 
-    .answer-reveal {
-      font-size: 1.6rem;
-      color: var(--accent-red);
-      margin: 0.6rem 0;
-      font-weight: 800;
-    }
-
-    .result-card {
-      text-align: center;
-      padding: 2rem 1rem;
-    }
-
-    .score-circle {
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
-      color: #713f12;
+    #countdown-overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(246, 240, 222, 0.95);
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      margin: 1.2rem auto;
-      box-shadow: 0 8px 20px rgba(234, 179, 8, 0.4), inset 0 2px 4px rgba(255,255,255,0.6);
-      border: 4px solid #ffffff;
+      z-index: 10;
+      border-radius: 12px;
     }
-
-    .score-num {
-      font-size: 2.5rem;
-      font-weight: 900;
-      line-height: 1;
-    }
-
-    .score-total {
-      font-size: 1rem;
-      font-weight: bold;
-      opacity: 0.8;
+    #countdown-number {
+      font-size: 5rem;
+      font-weight: 800;
+      color: #0284c7;
     }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <div id="correct-popup" class="correct-popup">正解！</div>
-
-  <!-- スタート画面 -->
-  <div id="start-screen" class="screen active">
-    <h1>ターゲット1900<br>早押しタイピング</h1>
-    <p class="subtitle">製作者：<a href="https://x.com/syokuennsu1" style="color: #FFC800;">食縁水</a></p>
+  <!-- ホーム選択画面 -->
+  <div id="home-screen" class="screen active">
+    <h1>ターゲット1900 早押しタイピング</h1>
+    <p class="subtitle">製作者；<a href="https://x.com/syokuennsu1" style="color: #d2b48c;">食縁水</a></p>
     
     <div class="card">
+      <button class="btn-primary" onclick="goToSoloSetup()">1人用モード</button>
+      <button class="btn-secondary" onclick="goToMultiLobby()">オンライン対戦モード (1対1)</button>
+    </div>
+  </div>
+
+  <!-- 1人用 設定画面 -->
+  <div id="solo-setup-screen" class="screen">
+    <h1>1人用モード設定</h1>
+    <p class="subtitle">出題範囲と問題数の選択</p>
+
+    <div class="card">
+      <div class="form-group">
+        <label>プレイヤー名 (必須)</label>
+        <input type="text" id="solo-player-name" placeholder="名前を入力" maxlength="10" value="プレイヤー">
+      </div>
+
       <div class="form-group">
         <label>出題範囲プリセット</label>
-        <select id="preset-select" onchange="applyPreset()">
+        <select id="preset-select" onchange="applyPreset('solo')">
           <option value="all">全範囲 (1 - 1900)</option>
           <option value="1-800">Part 1 (1 - 800)</option>
-          <option value="801-1500"> Part 2 (801 - 1500)</option>
+          <option value="801-1500">Part 2 (801 - 1500)</option>
           <option value="1501-1900">Part 3 (1501 - 1900)</option>
         </select>
       </div>
@@ -380,7 +379,7 @@
       </div>
 
       <div class="form-group">
-        <label>出題問題数</label>
+        <label>問題数</label>
         <select id="question-count">
           <option value="10">10 問</option>
           <option value="20" selected>20 問</option>
@@ -390,15 +389,101 @@
       </div>
     </div>
 
-    <button class="btn-primary" onclick="startGame()">クイズスタート！</button>
+    <button class="btn-primary" onclick="startSoloGame()">スタート</button>
+    <button class="btn-secondary" onclick="switchScreen('home-screen')">戻る</button>
+  </div>
+
+  <!-- マルチ対戦 ロビー -->
+  <div id="multi-lobby-screen" class="screen">
+    <h1>オンライン対戦 (1対1)</h1>
+    <p class="subtitle">部屋の作成と参加</p>
+
+    <div class="card">
+      <div class="form-group">
+        <label>プレイヤー名 (必須)</label>
+        <input type="text" id="multi-player-name" placeholder="名前を入力" maxlength="10" value="プレイヤー">
+      </div>
+    </div>
+
+    <div class="card" id="multi-create-card">
+      <button class="btn-primary" onclick="createRoom()">対戦部屋を作成する</button>
+    </div>
+
+    <div class="card" id="multi-join-card">
+      <div class="form-group">
+        <label>ルームID / 招待URL</label>
+        <input type="text" id="room-id-input" placeholder="IDを入力">
+      </div>
+      <button class="btn-secondary" onclick="joinRoom()">部屋に参加する</button>
+    </div>
+
+    <div id="room-waiting-box" style="display:none;">
+      <!-- ホスト専用：出題範囲・問題数設定パネル -->
+      <div class="card" id="host-settings-card" style="display:none;">
+        <label style="font-size:0.95rem; font-weight:700; margin-bottom:0.8rem;">対戦設定 (ホストのみ設定可能)</label>
+        
+        <div class="form-group">
+          <label>出題範囲プリセット</label>
+          <select id="multi-preset-select" onchange="applyPreset('multi')">
+            <option value="all">全範囲 (1 - 1900)</option>
+            <option value="1-800">Part 1 (1 - 800)</option>
+            <option value="801-1500">Part 2 (801 - 1500)</option>
+            <option value="1501-1900">Part 3 (1501 - 1900)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>番号指定 (1 〜 1900)</label>
+          <div class="range-inputs">
+            <input type="number" id="multi-start-num" value="1" min="1" max="1900">
+            <span>〜</span>
+            <input type="number" id="multi-end-num" value="1900" min="1" max="1900">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0;">
+          <label>問題数</label>
+          <select id="multi-question-count">
+            <option value="10" selected>10 問</option>
+            <option value="20">20 問</option>
+            <option value="50">50 問</option>
+            <option value="100">100 問</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card">
+        <label>共有用URL</label>
+        <div class="room-info-box" id="share-url-display">接続準備中...</div>
+        <button class="btn-copy" id="copy-btn" onclick="copyShareUrl()">URLをコピー</button>
+        
+        <label style="margin-top: 1.2rem;">参加メンバー (<span id="participant-count">1</span>/2人)</label>
+        <ul class="player-list" id="player-list-ui"></ul>
+
+        <button class="btn-primary" id="host-start-btn" onclick="hostStartGame()" style="display:none;">対戦を開始する</button>
+        <p id="guest-wait-msg" style="text-align:center; color:#64748b; font-size:0.85rem; margin-top:0.5rem;">ホストの開始をお待ちください...</p>
+      </div>
+    </div>
+
+    <button class="btn-secondary" onclick="switchScreen('home-screen')">戻る</button>
   </div>
 
   <!-- ゲーム画面 -->
   <div id="game-screen" class="screen">
+    <!-- カウントダウン用画面 -->
+    <div id="countdown-overlay" style="display:none;">
+      <div style="font-size: 1.2rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">まもなくスタート</div>
+      <div id="countdown-number">3</div>
+    </div>
+
     <div class="game-header">
-      <span id="question-progress">Q 1/20</span>
-      <span id="score-display">正解数: 0</span>
-      <button class="btn-quit" onclick="quitGame()">辞める</button>
+      <span id="question-progress">Q 1/10</span>
+      <button class="btn-quit" onclick="quitGame()">やめる</button>
+    </div>
+
+    <div class="score-board" id="score-board" style="display:none;">
+      <div><span id="my-score-text">あなた: 0問</span></div>
+      <div><span id="opp-score-text">対戦相手: 0問</span></div>
     </div>
 
     <div class="timer-bar-container">
@@ -407,16 +492,15 @@
 
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div class="badge"><span class="badge-text" id="word-id">No. 1</span></div>
-        <div style="color:#64748b; font-size:0.85rem; font-weight:bold;">ターゲット1900</div>
+        <div class="badge" id="word-id" style="color:var(--accent-blue); font-weight:600;">No. 1</div>
+        <div style="color:#64748b; font-size:0.85rem;">制限時間: <span id="time-num">6.0</span>秒</div>
       </div>
       
-      <div class="japanese-word" id="jp-word">を創り出す</div>
+      <div class="japanese-word" id="jp-word" style="margin-top: 0.8rem;">を創り出す</div>
       <div class="word-display" id="word-display"></div>
     </div>
 
     <div id="controls-area">
-      <div class="badge" style="background:#2563eb;"><span class="badge-text">選択肢 (a - z)</span></div>
       <div class="choices-row" id="choices-grid">
         <button class="choice-btn">a</button>
         <button class="choice-btn">b</button>
@@ -425,36 +509,131 @@
       </div>
     </div>
 
-    <div id="game-over-panel" class="game-over-panel" style="display:none;">
-      <h3 style="color:var(--accent-red); font-size:1.3rem;">不正解・タイムアップ</h3>
-      <p style="margin-top:0.4rem; color:#64748b; font-weight:bold;">正解の単語:</p>
-      <div class="answer-reveal" id="correct-answer-text">create</div>
-      <button class="btn-primary" style="margin-top:0.8rem; padding:0.8rem;" onclick="nextQuestion()">次の問題へ</button>
+    <div id="msg-overlay" class="msg-overlay" style="display: none;">
+      <div id="msg-title" style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.3rem;">正解</div>
+      <div id="msg-sub" style="color: #64748b; font-size: 0.85rem;">次の問題へ進みます...</div>
     </div>
   </div>
 
   <!-- リザルト画面 -->
   <div id="result-screen" class="screen">
-    <div class="card result-card">
-      <h1>クイズ終了！</h1>
-      <p style="color:#64748b; font-weight:bold;">お疲れ様でした！今回の結果です</p>
+    <div class="card" style="text-align: center; padding: 2rem 1rem;">
+      <h1>結果発表</h1>
+      <p style="color:#64748b; margin-bottom: 1.5rem;" id="result-subtitle">お疲れ様でした</p>
       
-      <div class="score-circle">
-        <div class="score-num" id="correct-count">0</div>
-        <div class="score-total" id="total-count-text">/ 20 正解</div>
-      </div>
+      <div id="final-ranking-list" style="margin-bottom: 1.5rem; text-align: left;"></div>
 
-      <p id="result-rank" style="font-weight:800; font-size:1.2rem; color:#b45309; margin-bottom:1.5rem;"></p>
+      <!-- オンライン対戦時のみ表示：もう一度設定から始めるボタン -->
+      <button class="btn-primary" id="multi-restart-btn" onclick="backToLobbySettings()" style="display:none; margin-bottom: 0.8rem;">設定を変更してもう一度遊ぶ</button>
+      <p id="guest-restart-msg" style="color:#64748b; font-size:0.85rem; margin-bottom:0.8rem; display:none;">ホストの設定をお待ちください...</p>
 
-      <button class="btn-primary" onclick="showStartScreen()">もう一度挑戦する</button>
+      <!-- ソロ時は設定画面へ、マルチ時はホームへ戻るボタン -->
+      <button class="btn-secondary" id="result-back-btn" onclick="handleResultBack()">設定画面に戻る</button>
     </div>
   </div>
 </div>
 
 <script>
-// ターゲット1900 完全1900語データ
+// --- 音声システム (Web Audio API) ---
+let audioCtx = null;
+
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
+function playSound(type) {
+  try {
+    initAudio();
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+
+    if (type === 'type') {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(1200, now);
+      osc.frequency.exponentialRampToValueAtTime(80, now + 0.025);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.linearRampToValueAtTime(0.001, now + 0.025);
+      osc.start(now);
+      osc.stop(now + 0.025);
+    } else if (type === 'char_correct') {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, now);
+      osc.frequency.setValueAtTime(1200, now + 0.05);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
+      osc.start(now);
+      osc.stop(now + 0.1);
+    } else if (type === 'word_correct') {
+      const notes = [523.25, 659.25, 783.99, 1046.5];
+      notes.forEach((freq, idx) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const startTime = now + idx * 0.07;
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, startTime);
+        gain.gain.setValueAtTime(0.18, startTime);
+        gain.gain.linearRampToValueAtTime(0.001, startTime + 0.15);
+        osc.start(startTime);
+        osc.stop(startTime + 0.15);
+      });
+    } else if (type === 'miss') {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(150, now);
+      osc.frequency.setValueAtTime(100, now + 0.15);
+      gain.gain.setValueAtTime(0.25, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+      osc.start(now);
+      osc.stop(now + 0.3);
+    } else if (type === 'count') {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(600, now);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
+      osc.start(now);
+      osc.stop(now + 0.1);
+    } else if (type === 'count_start') {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1046.5, now);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+      osc.start(now);
+      osc.stop(now + 0.25);
+    }
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+// 単語データ
 const rawWords = [
-  [1,"create","を創り出す"],[2,"increase","増加する"],[3,"improve","を向上させる"],[4,"mean","を意味する"],[5,"own","を所有している"],
+ [1,"create","を創り出す"],[2,"increase","増加する"],[3,"improve","を向上させる"],[4,"mean","を意味する"],[5,"own","を所有している"],
   [6,"include","を含む"],[7,"consider","を見なす"],[8,"allow","を許す"],[9,"suggest","を提案する"],[10,"produce","を生産する"],
   [11,"decide","を決める"],[12,"offer","を提供する"],[13,"require","を要求する"],[14,"share","を共有する"],[15,"store","を保存する"],
   [16,"tend","傾向がある"],[17,"concern","心配している"],[18,"describe","について述べる"],[19,"involve","に関与させる"],[20,"reduce","を減らす"],
@@ -835,6 +1014,7 @@ const rawWords = [
   [1891,"contagious","感染性の"],[1892,"cynical","冷笑的な"],[1893,"dumb","ばかげた"],[1894,"monotonous","単調な"],[1895,"perpetual","永続的な"],
   [1896,"dizzy","めまいがする"],[1897,"weary","疲れ果てた"],[1898,"numb","麻痺した"],[1899,"mortal","致命的な"],[1900,"zealous","熱心な"]
 ];
+;
 
 const wordsDatabase = [];
 const rawMap = new Map();
@@ -848,46 +1028,63 @@ for (let i = 1; i <= 1900; i++) {
   }
 }
 
+// ゲーム状態
+let mode = 'solo';
 let currentQuizList = [];
 let currentQuestionIndex = 0;
 let currentWord = null;
-let currentCharIndex = 0;
+let currentCharIndex = 1; 
 let correctCount = 0;
-let timeLeft = 10;
-const MAX_TIME = 15;
+let timeLeft = 6.0;
+const MAX_TIME = 6.0;
 let timerId = null;
 let isAnswerable = false;
 
-// 効果音 (Web Audio API)
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playSound(type) {
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
+let peer = null;
+let conn = null;
+let myName = "";
+let roomId = "";
+let isHost = false;
+let opponentName = "対戦相手";
+let opponentScore = 0;
+let myFinishedCurrentQ = false;
+let oppFinishedCurrentQ = false;
+let hasOpponentJoined = false;
 
-  if (type === 'correct') {
-    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
-    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
-    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.3);
-  } else if (type === 'miss') {
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.4);
+window.onload = function() {
+  const params = new URLSearchParams(window.location.search);
+  const r = params.get('room');
+  if (r) {
+    document.getElementById('room-id-input').value = r;
+    switchScreen('multi-lobby-screen');
+    mode = 'multi';
+  }
+};
+
+function switchScreen(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+}
+
+function goToSoloSetup() {
+  mode = 'solo';
+  switchScreen('solo-setup-screen');
+}
+
+function goToMultiLobby() {
+  mode = 'multi';
+  switchScreen('multi-lobby-screen');
+  const r = document.getElementById('room-id-input').value;
+  if (r) {
+    document.getElementById('room-id-input').value = r;
   }
 }
 
-function applyPreset() {
-  const val = document.getElementById('preset-select').value;
-  const startInput = document.getElementById('start-num');
-  const endInput = document.getElementById('end-num');
+function applyPreset(targetMode) {
+  const prefix = targetMode === 'multi' ? 'multi-' : '';
+  const val = document.getElementById(prefix + 'preset-select').value;
+  const startInput = document.getElementById(prefix + 'start-num');
+  const endInput = document.getElementById(prefix + 'end-num');
 
   if (val === 'all') { startInput.value = 1; endInput.value = 1900; }
   else if (val === '1-800') { startInput.value = 1; endInput.value = 800; }
@@ -895,14 +1092,22 @@ function applyPreset() {
   else if (val === '1501-1900') { startInput.value = 1501; endInput.value = 1900; }
 }
 
-function startGame() {
+function startSoloGame() {
+  const nameInput = document.getElementById('solo-player-name').value.trim();
+  if (!nameInput) {
+    alert('プレイヤー名を入力してください。');
+    document.getElementById('solo-player-name').focus();
+    return;
+  }
+  myName = nameInput;
+
   const startNum = parseInt(document.getElementById('start-num').value) || 1;
   const endNum = parseInt(document.getElementById('end-num').value) || 1900;
   const qCount = parseInt(document.getElementById('question-count').value);
 
   const filtered = wordsDatabase.filter(w => w.id >= startNum && w.id <= endNum);
   if (filtered.length === 0) {
-    alert('指定範囲内に単語がありません');
+    alert('指定範囲内に単語がありません。');
     return;
   }
 
@@ -911,34 +1116,304 @@ function startGame() {
   correctCount = 0;
 
   switchScreen('game-screen');
-  loadQuestion();
+  document.getElementById('score-board').style.display = 'none';
+  
+  runCountdown(() => {
+    loadQuestion();
+  });
 }
 
-function quitGame() {
-  if (confirm('ゲームを中断してタイトルに戻りますか？')) {
-    clearInterval(timerId);
-    isAnswerable = false;
-    showStartScreen();
+function runCountdown(callback) {
+  const overlay = document.getElementById('countdown-overlay');
+  const numEl = document.getElementById('countdown-number');
+  overlay.style.display = 'flex';
+  
+  let count = 3;
+  numEl.innerText = count;
+  playSound('count');
+
+  const countInterval = setInterval(() => {
+    count--;
+    if (count > 0) {
+      numEl.innerText = count;
+      playSound('count');
+    } else if (count === 0) {
+      numEl.innerText = "スタート";
+      playSound('count_start');
+    } else {
+      clearInterval(countInterval);
+      overlay.style.display = 'none';
+      callback();
+    }
+  }, 800);
+}
+
+// ホスト側の出題リスト生成ロジック
+function generateMultiQuizList() {
+  const startNum = parseInt(document.getElementById('multi-start-num').value) || 1;
+  const endNum = parseInt(document.getElementById('multi-end-num').value) || 1900;
+  const qCount = parseInt(document.getElementById('multi-question-count').value) || 10;
+
+  const filtered = wordsDatabase.filter(w => w.id >= startNum && w.id <= endNum);
+  if (filtered.length === 0) {
+    alert('指定範囲内に単語がありません。');
+    return null;
+  }
+  return [...filtered].sort(() => Math.random() - 0.5).slice(0, qCount);
+}
+
+// --- 通信処理 ---
+function createRoom() {
+  const nameInput = document.getElementById('multi-player-name').value.trim();
+  if (!nameInput) {
+    alert('プレイヤー名を入力してください。');
+    document.getElementById('multi-player-name').focus();
+    return;
+  }
+  myName = nameInput;
+  isHost = true;
+  hasOpponentJoined = false;
+
+  document.getElementById('multi-create-card').style.display = 'none';
+  document.getElementById('multi-join-card').style.display = 'none';
+  document.getElementById('room-waiting-box').style.display = 'block';
+  document.getElementById('host-settings-card').style.display = 'block';
+
+  peer = new Peer();
+  peer.on('open', (id) => {
+    roomId = id;
+    const shareUrl = location.protocol + '//' + location.host + location.pathname + '?room=' + roomId;
+    document.getElementById('share-url-display').innerText = shareUrl;
+    updateRoomUI([{ name: myName + " (あなた)", ready: true }]);
+  });
+
+  peer.on('connection', (c) => {
+    if (hasOpponentJoined) {
+      c.on('open', () => {
+        c.send({ type: 'FULL' });
+        setTimeout(() => c.close(), 500);
+      });
+      return;
+    }
+
+    conn = c;
+    hasOpponentJoined = true;
+    setupConnection();
+  });
+}
+
+function joinRoom() {
+  const nameInput = document.getElementById('multi-player-name').value.trim();
+  if (!nameInput) {
+    alert('プレイヤー名を入力してください。');
+    document.getElementById('multi-player-name').focus();
+    return;
+  }
+  myName = nameInput;
+
+  roomId = document.getElementById('room-id-input').value.trim();
+  if (!roomId) {
+    alert('ルームIDまたはURLを入力してください。');
+    return;
+  }
+  if (roomId.includes('?room=')) {
+    roomId = roomId.split('?room=')[1];
+  }
+
+  isHost = false;
+  document.getElementById('multi-create-card').style.display = 'none';
+  document.getElementById('multi-join-card').style.display = 'none';
+  document.getElementById('room-waiting-box').style.display = 'block';
+  document.getElementById('host-settings-card').style.display = 'none';
+
+  peer = new Peer();
+  peer.on('open', () => {
+    conn = peer.connect(roomId);
+    setupConnection();
+  });
+}
+
+function setupConnection() {
+  conn.on('open', () => {
+    conn.send({ type: 'JOIN', name: myName });
+  });
+
+  conn.on('data', (data) => {
+    if (data.type === 'FULL') {
+      alert('この部屋はすでに満員（2人）です。');
+      leaveRoomAndHome();
+    } else if (data.type === 'JOIN') {
+      opponentName = data.name;
+      if (isHost) {
+        document.getElementById('host-start-btn').style.display = 'block';
+        document.getElementById('guest-wait-msg').style.display = 'none';
+        conn.send({ type: 'ACCEPT', name: myName });
+      }
+      updateRoomUI([
+        { name: isHost ? myName + " (あなた)" : opponentName, ready: true },
+        { name: isHost ? opponentName : myName + " (あなた)", ready: true }
+      ]);
+    } else if (data.type === 'ACCEPT') {
+      opponentName = data.name;
+      updateRoomUI([
+        { name: opponentName + " (ホスト)", ready: true },
+        { name: myName + " (あなた)", ready: true }
+      ]);
+    } else if (data.type === 'START_GAME') {
+      currentQuizList = data.quizList;
+      currentQuestionIndex = 0;
+      correctCount = 0;
+      opponentScore = 0;
+      switchScreen('game-screen');
+      document.getElementById('score-board').style.display = 'flex';
+      
+      runCountdown(() => {
+        loadQuestion();
+      });
+    } else if (data.type === 'BACK_TO_LOBBY') {
+      // ゲスト側もロビー（設定画面）へ戻る
+      switchScreen('multi-lobby-screen');
+      document.getElementById('host-settings-card').style.display = 'none';
+      document.getElementById('room-waiting-box').style.display = 'block';
+      document.getElementById('host-start-btn').style.display = 'none';
+      document.getElementById('guest-wait-msg').style.display = 'block';
+    } else if (data.type === 'PLAYER_FINISH_Q') {
+      oppFinishedCurrentQ = true;
+      opponentScore = data.score;
+      updateScoreBoard();
+      checkBothFinishedQuestion();
+    } else if (data.type === 'LEAVE') {
+      alert('対戦相手が退出しました。');
+      leaveRoomAndHome();
+    }
+  });
+
+  conn.on('close', () => {
+    alert('対戦相手との接続が切れました。');
+    leaveRoomAndHome();
+  });
+}
+
+function copyShareUrl() {
+  const urlText = document.getElementById('share-url-display').innerText;
+  navigator.clipboard.writeText(urlText).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.innerText = "コピー完了";
+    setTimeout(() => { btn.innerText = "URLをコピー"; }, 2000);
+  });
+}
+
+function updateRoomUI(players) {
+  const listEl = document.getElementById('player-list-ui');
+  listEl.innerHTML = '';
+  players.forEach(p => {
+    listEl.innerHTML += `
+      <li class="player-item">
+        <span>${p.name}</span>
+        <span class="status-badge ready">接続完了</span>
+      </li>
+    `;
+  });
+  document.getElementById('participant-count').innerText = players.length;
+}
+
+function hostStartGame() {
+  if (!conn) {
+    alert("相手の参加をお待ちください。");
+    return;
+  }
+  const generatedQuiz = generateMultiQuizList();
+  if (!generatedQuiz) return;
+
+  currentQuizList = generatedQuiz;
+  conn.send({ type: 'START_GAME', quizList: currentQuizList });
+
+  currentQuestionIndex = 0;
+  correctCount = 0;
+  opponentScore = 0;
+  switchScreen('game-screen');
+  document.getElementById('score-board').style.display = 'flex';
+  
+  runCountdown(() => {
+    loadQuestion();
+  });
+}
+
+function backToLobbySettings() {
+  if (!conn) return;
+  // ホストが設定画面に戻る指令をゲストに送る
+  conn.send({ type: 'BACK_TO_LOBBY' });
+
+  // ホスト自身もロビー画面（設定付き）へ戻る
+  switchScreen('multi-lobby-screen');
+  document.getElementById('multi-create-card').style.display = 'none';
+  document.getElementById('multi-join-card').style.display = 'none';
+  document.getElementById('room-waiting-box').style.display = 'block';
+  document.getElementById('host-settings-card').style.display = 'block';
+  document.getElementById('host-start-btn').style.display = 'block';
+  document.getElementById('guest-wait-msg').style.display = 'none';
+}
+
+function handleResultBack() {
+  if (mode === 'solo') {
+    // ソロモードの場合は1人用設定画面に戻る
+    switchScreen('solo-setup-screen');
+  } else {
+    // マルチ対戦の場合は設定画面（ロビー）に戻る
+    switchScreen('multi-lobby-screen');
+    if (isHost) {
+      document.getElementById('host-settings-card').style.display = 'block';
+      document.getElementById('host-start-btn').style.display = 'block';
+      document.getElementById('guest-wait-msg').style.display = 'none';
+    } else {
+      document.getElementById('host-settings-card').style.display = 'none';
+      document.getElementById('host-start-btn').style.display = 'none';
+      document.getElementById('guest-wait-msg').style.display = 'block';
+    }
   }
 }
 
-function switchScreen(screenId) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(screenId).classList.add('active');
+function quitGame() {
+  if (confirm('ゲームを中断してホームに戻りますか？')) {
+    leaveRoomAndHome();
+  }
+}
+
+function leaveRoomAndHome() {
+  clearInterval(timerId);
+  isAnswerable = false;
+  hasOpponentJoined = false;
+  if (conn) {
+    try { conn.send({ type: 'LEAVE' }); } catch(e){}
+    conn.close();
+  }
+  if (peer) {
+    peer.destroy();
+  }
+  window.history.replaceState({}, document.title, window.location.pathname);
+  document.getElementById('multi-create-card').style.display = 'block';
+  document.getElementById('multi-join-card').style.display = 'block';
+  document.getElementById('room-waiting-box').style.display = 'none';
+  document.getElementById('host-settings-card').style.display = 'none';
+  switchScreen('home-screen');
 }
 
 function loadQuestion() {
   clearInterval(timerId);
-  document.getElementById('game-over-panel').style.display = 'none';
+  document.getElementById('msg-overlay').style.display = 'none';
   document.getElementById('controls-area').style.display = 'block';
 
+  myFinishedCurrentQ = false;
+  oppFinishedCurrentQ = false;
+
   currentWord = currentQuizList[currentQuestionIndex];
-  currentCharIndex = 1;
-  timeLeft = 10;
+  currentCharIndex = 1; 
+  timeLeft = 6.0; 
   isAnswerable = true;
 
   document.getElementById('question-progress').innerText = `Q ${currentQuestionIndex + 1}/${currentQuizList.length}`;
-  document.getElementById('score-display').innerText = `正解数: ${correctCount}`;
+  updateScoreBoard();
+    
   document.getElementById('word-id').innerText = `No. ${currentWord.id}`;
   document.getElementById('jp-word').innerText = currentWord.jp;
 
@@ -963,20 +1438,32 @@ function loadQuestion() {
   startTimer();
 }
 
+function updateScoreBoard() {
+  if (mode === 'multi') {
+    document.getElementById('my-score-text').innerText = `${myName || "あなた"}: ${correctCount}問`;
+    document.getElementById('opp-score-text').innerText = `${opponentName}: ${opponentScore}問`;
+  }
+}
+
 function startTimer() {
   const bar = document.getElementById('timer-bar');
-  const step = 100;
+  const timeNum = document.getElementById('time-num');
+  const step = 50;
   
   timerId = setInterval(() => {
+    if (!isAnswerable) return;
     timeLeft -= step / 1000;
+    if (timeLeft < 0) timeLeft = 0;
     if (timeLeft > MAX_TIME) timeLeft = MAX_TIME;
     
-    const pct = Math.max(0, (timeLeft / MAX_TIME) * 100);
-    bar.style.width = pct + '%';
+    timeNum.innerText = timeLeft.toFixed(1);
+    const pct = (timeLeft / MAX_TIME) * 100;
+    bar.style.width = Math.max(0, pct) + '%';
 
     if (timeLeft <= 0) {
       clearInterval(timerId);
-      handleMiss();
+      playSound('miss');
+      handleFinishQuestion(false);
     }
   }, step);
 }
@@ -1000,7 +1487,10 @@ function updateChoices() {
   const btns = document.querySelectorAll('.choice-btn');
   btns.forEach((btn, idx) => {
     btn.innerText = choices[idx];
-    btn.onclick = () => handleInput(choices[idx]);
+    btn.onclick = () => {
+      playSound('type');
+      handleInput(choices[idx]);
+    };
   });
 }
 
@@ -1010,7 +1500,7 @@ function handleInput(selectedChar) {
   const correctChar = currentWord.en[currentCharIndex].toLowerCase();
 
   if (selectedChar === correctChar) {
-    timeLeft = Math.min(MAX_TIME, timeLeft + 1.5);
+    timeLeft = Math.min(MAX_TIME, timeLeft + 2.0);
     
     const box = document.getElementById(`char-${currentCharIndex}`);
     box.innerText = correctChar;
@@ -1020,34 +1510,65 @@ function handleInput(selectedChar) {
     currentCharIndex++;
 
     if (currentCharIndex < currentWord.en.length) {
+      playSound('char_correct');
       document.getElementById(`char-${currentCharIndex}`).classList.add('current');
       updateChoices();
     } else {
+      isAnswerable = false;
       clearInterval(timerId);
       correctCount++;
-      playSound('correct');
-      
-      const popup = document.getElementById('correct-popup');
-      popup.classList.add('show');
-      setTimeout(() => popup.classList.remove('show'), 600);
+      playSound('word_correct');
+      updateScoreBoard();
 
-      setTimeout(() => {
-        nextQuestion();
-      }, 700);
+      handleFinishQuestion(true);
     }
   } else {
-    handleMiss();
+    playSound('miss');
+    handleFinishQuestion(false);
   }
 }
 
-function handleMiss() {
+function handleFinishQuestion(isSuccess) {
   isAnswerable = false;
   clearInterval(timerId);
-  playSound('miss');
+  myFinishedCurrentQ = true;
+
+  if (mode === 'multi' && conn) {
+    conn.send({ type: 'PLAYER_FINISH_Q', score: correctCount });
+  }
 
   document.getElementById('controls-area').style.display = 'none';
-  document.getElementById('correct-answer-text').innerText = `${currentWord.en} (${currentWord.jp})`;
-  document.getElementById('game-over-panel').style.display = 'block';
+  const titleEl = document.getElementById('msg-title');
+  const subEl = document.getElementById('msg-sub');
+
+  if (isSuccess) {
+    titleEl.innerText = `正解 (${currentWord.en})`;
+    titleEl.style.color = 'var(--accent-green)';
+  } else {
+    titleEl.innerText = `不正解 / タイムアップ (正解: ${currentWord.en})`;
+    titleEl.style.color = 'var(--accent-red)';
+  }
+
+  document.getElementById('msg-overlay').style.display = 'block';
+
+  if (mode === 'solo') {
+    subEl.innerText = "次の問題へ進みます...";
+    setTimeout(nextQuestion, 1200);
+  } else {
+    subEl.innerText = "対戦相手の回答を待っています...";
+    checkBothFinishedQuestion();
+  }
+}
+
+function checkBothFinishedQuestion() {
+  if (mode === 'solo') return;
+
+  if (myFinishedCurrentQ && oppFinishedCurrentQ) {
+    document.getElementById('msg-sub').innerText = "まもなく次の問題へ";
+    setTimeout(() => {
+      nextQuestion();
+    }, 1000);
+  }
 }
 
 function nextQuestion() {
@@ -1061,29 +1582,70 @@ function nextQuestion() {
 
 function showResult() {
   switchScreen('result-screen');
-  document.getElementById('correct-count').innerText = correctCount;
-  document.getElementById('total-count-text').innerText = `/ ${currentQuizList.length} 正解`;
-
-  const rate = correctCount / currentQuizList.length;
-  let rankText = "素晴らしいチャレンジ！";
-  if (rate === 1) rankText = "全問正解！完璧です！";
-  else if (rate >= 0.8) rankText = "素晴らしい高得点！";
-  else if (rate >= 0.5) rankText = "ナイス！その調子です！";
   
-  document.getElementById('result-rank').innerText = rankText;
+  const subtitleEl = document.getElementById('result-subtitle');
+  const rankingEl = document.getElementById('final-ranking-list');
+  const multiRestartBtn = document.getElementById('multi-restart-btn');
+  const guestRestartMsg = document.getElementById('guest-restart-msg');
+  const backBtn = document.getElementById('result-back-btn');
+
+  if (mode === 'solo') {
+    subtitleEl.innerText = "1人用モード結果";
+    multiRestartBtn.style.display = 'none';
+    guestRestartMsg.style.display = 'none';
+    backBtn.innerText = "設定画面に戻る";
+    rankingEl.innerHTML = `
+      <div class="player-item" style="font-size: 0.95rem; padding: 0.7rem 1rem;">
+        <span>${myName} の正解数</span>
+        <strong>${correctCount} / ${currentQuizList.length} 問</strong>
+      </div>
+    `;
+  } else {
+    let winText = "引き分け";
+    if (correctCount > opponentScore) {
+      winText = `勝者: ${myName} さん`;
+    } else if (correctCount < opponentScore) {
+      winText = `勝者: ${opponentName} さん`;
+    }
+    subtitleEl.innerText = winText;
+
+    multiRestartBtn.style.display = 'none';
+    guestRestartMsg.style.display = 'none';
+    backBtn.innerText = "設定画面に戻る";
+
+    const players = [
+      { name: myName + " (あなた)", score: correctCount },
+      { name: opponentName, score: opponentScore }
+    ];
+    players.sort((a, b) => b.score - a.score);
+
+    rankingEl.innerHTML = '';
+    players.forEach((p, idx) => {
+      rankingEl.innerHTML += `
+        <div class="player-item" style="font-size: 0.95rem; padding: 0.7rem 1rem;">
+          <span>${idx + 1}位: ${p.name}</span>
+          <strong>${p.score} 問正解</strong>
+        </div>
+      `;
+    });
+  }
 }
 
-function showStartScreen() {
-  switchScreen('start-screen');
-}
-
+// キーボード打鍵対応
 window.addEventListener('keydown', (e) => {
   if (!isAnswerable) return;
   const key = e.key.toLowerCase();
   if (key >= 'a' && key <= 'z' && key.length === 1) {
-    handleInput(key);
+    const btns = document.querySelectorAll('.choice-btn');
+    btns.forEach(btn => {
+      if (btn.innerText === key) {
+        playSound('type');
+        handleInput(key);
+      }
+    });
   }
 });
 </script>
+
 </body>
 </html>
