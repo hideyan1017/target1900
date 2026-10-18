@@ -310,6 +310,12 @@
       background: #f1f5f9;
     }
 
+    .choice-btn:focus, .choice-btn:active {
+      outline: none;
+      box-shadow: none;
+      background: #e2e8f0;
+    }
+
     .room-info-box {
       background: #ffffff;
       padding: 0.8rem;
@@ -1260,12 +1266,7 @@ function createRoom() {
   document.getElementById('guest-leave-btn').style.display = 'none';
   document.getElementById('lobby-back-btn').style.display = 'none';
 
-  peer = new Peer(sixDigitId, {
-  host: 'target1900-1lh4.onrender.com',
-  port: 443,
-  secure: true,
-  path: '/'
-});
+  peer = new Peer(sixDigitId);
   peer.on('open', (id) => {
     myPeerId = id;
     roomId = id;
