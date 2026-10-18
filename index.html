@@ -1260,7 +1260,12 @@ function createRoom() {
   document.getElementById('guest-leave-btn').style.display = 'none';
   document.getElementById('lobby-back-btn').style.display = 'none';
 
-  peer = new Peer(sixDigitId);
+  peer = new Peer(sixDigitId, {
+  host: 'target1900-1lh4.onrender.com',
+  port: 443,
+  secure: true,
+  path: '/'
+});
   peer.on('open', (id) => {
     myPeerId = id;
     roomId = id;
