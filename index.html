@@ -62,6 +62,25 @@
     .screen { display: none; }
     .screen.active { display: block; }
 
+    /* 左上のボタン用スタイル */
+    .btn-top-left {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      padding: 0.3rem 0.6rem;
+      border: none;
+      border-radius: 4px;
+      background: #64748b;
+      color: white;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      z-index: 5;
+    }
+    .btn-top-left:hover {
+      background: #475569;
+    }
+
     h1 {
       text-align: center;
       color: var(--text-main);
@@ -355,19 +374,6 @@
     }
     .status-badge.ready { background: #dcfce7; color: #166534; }
 
-    .btn-report {
-      padding: 0.2rem 0.4rem;
-      font-size: 0.75rem;
-      background: #fef2f2;
-      color: #dc2626;
-      border: 1px solid #fca5a5;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .btn-report:hover {
-      background: #fee2e2;
-    }
-
     .msg-overlay {
       background: #f8fafc;
       border: 1px solid var(--border-color);
@@ -400,6 +406,9 @@
 <div class="container">
   <!-- ホーム選択画面 -->
   <div id="home-screen" class="screen active">
+    <!-- 最初の画面の左上に配置した「一覧に戻る」ボタン（別サイトへ移動） -->
+    <button class="btn-top-left" onclick="window.location.href='https://e-typing-quiz.netlify.app/'">一覧に戻る</button>
+
     <h1>ターゲット1900<br>早押しタイピング</h1>
     <p class="subtitle">製作者；<a href="https://x.com/syokuennsu1" style="color: #d2b48c;">食縁水</a></p>
     
@@ -1421,11 +1430,6 @@ function setupConnListeners(c) {
     } else if (data.type === 'CLOSE_ROOM') {
       alert('ホストが部屋を解散しました。');
       leaveRoomAndHome();
-    } else if (data.type === 'REPORT_PLAYER') {
-      if (isHost) {
-        const target = playersList.find(p => p.id === data.targetId);
-        alert(`[通報通知] プレイヤー「${target ? target.name : '不明'}」が通報されました。`);
-      }
     } else if (data.type === 'LEAVE') {
       handlePeerDisconnection(data.peerId);
     }
@@ -1463,17 +1467,11 @@ function renderLobbyPlayerList() {
   playersList.forEach(p => {
     const isMe = p.id === myPeerId;
     const isHostUser = p.id === roomId;
-    
-    let reportBtnHtml = '';
-    if (!isMe) {
-      reportBtnHtml = `<button class="btn-report" onclick="reportPlayer('${p.id}')">通報</button>`;
-    }
 
     listEl.innerHTML += `
       <li class="player-item">
         <span>${p.name}${isMe ? ' (あなた)' : ''}${isHostUser ? ' [ホスト]' : ''}</span>
         <div style="display:flex; gap:0.5rem; align-items:center;">
-          ${reportBtnHtml}
           <span class="status-badge ready">接続完了</span>
         </div>
       </li>
@@ -1494,18 +1492,6 @@ function renderLobbyPlayerList() {
   }
 }
 
-function reportPlayer(targetId) {
-  if (confirm('このプレイヤーを通報しますか？')) {
-    if (isHost) {
-      const target = playersList.find(p => p.id === targetId);
-      alert(`[通報通知] プレイヤー「${target ? target.name : '不明'}」を通報しました。`);
-    } else {
-      guestConn.send({ type: 'REPORT_PLAYER', targetId: targetId });
-      alert('ホストに通報を送信しました。');
-    }
-  }
-}
-
 // SNS共有機能 (Web Share API)
 async function copyShareUrl() {
   const urlText = document.getElementById('share-url-display').innerText;
@@ -1515,7 +1501,6 @@ async function copyShareUrl() {
     url: urlText
   };
 
-  // スマホなど Web Share API に対応している場合
   if (navigator.share) {
     try {
       await navigator.share(shareData);
@@ -1523,7 +1508,6 @@ async function copyShareUrl() {
       console.log('共有がキャンセルされました:', err);
     }
   } else {
-    // PCなどの非対応環境ではクリップボードへコピー
     try {
       await navigator.clipboard.writeText(urlText);
       const btn = document.getElementById('copy-btn');
@@ -1569,7 +1553,6 @@ function hostStartGame() {
 
 function checkHostAloneDuringGame() {
   if (!isHost || !isGameStarted) return;
-  // ホスト以外が誰もいなくなった場合（自分＝1人のみ）
   if (playersList.length <= 1) {
     alert('他のプレイヤーが全員退出したため、ゲームを終了します。');
     isGameStarted = false;
