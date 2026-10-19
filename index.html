@@ -520,7 +520,7 @@
 
         <label style="margin-top: 1rem;">共有用URL</label>
         <div class="room-info-box" id="share-url-display">接続準備中...</div>
-        <button class="btn-copy" id="copy-btn" onclick="copyShareUrl()">URLをコピー</button>
+        <button class="btn-copy" id="copy-btn" onclick="copyShareUrl()">部屋のURLを共有 / コピー</button>
         
         <label style="margin-top: 1.2rem;">参加メンバー (<span id="participant-count">1</span>/8人)</label>
         <ul class="player-list" id="player-list-ui"></ul>
@@ -1506,13 +1506,33 @@ function reportPlayer(targetId) {
   }
 }
 
-function copyShareUrl() {
+// SNS共有機能 (Web Share API)
+async function copyShareUrl() {
   const urlText = document.getElementById('share-url-display').innerText;
-  navigator.clipboard.writeText(urlText).then(() => {
-    const btn = document.getElementById('copy-btn');
-    btn.innerText = "コピー完了";
-    setTimeout(() => { btn.innerText = "URLをコピー"; }, 2000);
-  });
+  const shareData = {
+    title: 'タゲタイピング',
+    text: '対戦部屋に参加しよう！',
+    url: urlText
+  };
+
+  // スマホなど Web Share API に対応している場合
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData);
+    } catch (err) {
+      console.log('共有がキャンセルされました:', err);
+    }
+  } else {
+    // PCなどの非対応環境ではクリップボードへコピー
+    try {
+      await navigator.clipboard.writeText(urlText);
+      const btn = document.getElementById('copy-btn');
+      btn.innerText = "コピー完了";
+      setTimeout(() => { btn.innerText = "部屋のURLを共有 / コピー"; }, 2000);
+    } catch (err) {
+      alert('コピーに失敗しました。');
+    }
+  }
 }
 
 function hostCloseRoom() {
